@@ -1,4 +1,6 @@
-export async function readJS(file: File): Promise<Object> {
+import * as xlsx from 'xlsx';
+
+export async function readJS(file: File): Promise<object> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -13,7 +15,7 @@ export async function readJS(file: File): Promise<Object> {
   });
 }
 
-function flattenDict(data: Object, parentKey = '', sep = '.') {
+function flattenDict(data: object, parentKey = '', sep = '.') {
   const items: [string, any][] = [];
   for (const [k, v] of Object.entries(data)) {
     const newKey = parentKey ? `${parentKey}${sep}${k}` : k;
@@ -28,7 +30,26 @@ function flattenDict(data: Object, parentKey = '', sep = '.') {
   return Object.fromEntries(items);
 }
 
-export function convertToDotNotation(jsObject: Object): Object {
+export function convertToDotNotation(jsObject: object): object {
   const flattenedObject = flattenDict(jsObject);
   return Object.fromEntries(Object.entries(flattenedObject));
+}
+
+export async function readExcel(file: File): Promise<object> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const result = e.target?.result;
+      const wb = xlsx.read(result, { type: 'buffer' });
+
+      const rows: { [key: string]: object } = {};
+      wb.SheetNames.forEach((sheetName) => {
+        const rowObj = xlsx.utils.sheet_to_json(wb.Sheets[sheetName]);
+        rows[sheetName] = rowObj;
+      });
+      resolve(rows);
+    };
+    reader.readAsArrayBuffer(file);
+    reader.onerror = reject;
+  });
 }

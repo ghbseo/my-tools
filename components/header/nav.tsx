@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import React from 'react';
-
+import Link from 'next/link';
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -20,10 +20,10 @@ export default function Nav() {
           <NavigationMenuTrigger>번역</NavigationMenuTrigger>
           <NavigationMenuContent>
             <ul className="grid w-[500px] grid-cols-2 gap-3 p-4">
-              <ListItem title="Excel" href="/translate/excel">
+              <ListItem title="JS" href="/translate/js">
                 JS 에서 Excel 로 변환
               </ListItem>
-              <ListItem title="JS" href="/translate/js">
+              <ListItem title="Excel" href="/translate/excel">
                 Excel 에서 JS 로 변환
               </ListItem>
             </ul>
@@ -41,28 +41,34 @@ export default function Nav() {
   );
 }
 
-const ListItem = React.forwardRef<
-  React.ElementRef<'a'>,
-  React.ComponentPropsWithoutRef<'a'>
->(({ className, title, children, ...props }, ref) => {
+const ListItem = ({
+  className,
+  title,
+  href,
+  children,
+}: {
+  className?: string;
+  title: string;
+  href: string;
+  children?: React.ReactNode;
+}) => {
   return (
     <li>
       <NavigationMenuLink asChild>
-        <a
-          ref={ref}
+        <Link
+          href={href}
           className={cn(
             'block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground',
             className
           )}
-          {...props}
         >
           <div className="text-sm font-medium leading-none">{title}</div>
           <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
             {children}
           </p>
-        </a>
+        </Link>
       </NavigationMenuLink>
     </li>
   );
-});
+};
 ListItem.displayName = 'ListItem';

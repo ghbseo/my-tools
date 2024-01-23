@@ -14,7 +14,7 @@ import {
   FormMessage,
 } from '../ui/form';
 import { Input } from '../ui/input';
-import { convertToDotNotation, readJS } from '@/action/translate';
+import { convertToDotNotation, readJS, readExcel } from '@/action/translate';
 import { useTranslateStore } from '@/store/translate';
 
 const MAX_FILE_SIZE = 500000;
@@ -28,10 +28,12 @@ export default function TranslateForm({
   title,
   desc,
   message,
+  type = 'js',
 }: {
   title: string;
   desc?: string;
   message: string;
+  type?: 'js' | 'excel';
 }) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -39,27 +41,51 @@ export default function TranslateForm({
       file: new File([], ''),
     },
   });
-  const { setI18n, setFileName, clearI18n, clearFileName } =
+  const { setI18n, setFileName, setRows, clearI18n, clearFileName, clearRows } =
     useTranslateStore();
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!ACCEPTED_FILE_TYPES.includes(values?.file.type)) {
-      form.setError('file', {
-        type: 'custom',
-        message: 'js 확장자를 가진 파일이어야 합니다.',
-      });
-      return;
-    }
-    try {
-      const i18n = await readJS(values.file);
-      const flattenI18n = convertToDotNotation(i18n);
-      setI18n(flattenI18n);
-      setFileName(values?.file.name);
-    } catch (error) {
-      form.setError('file', {
-        type: 'custom',
-        message: '파일 구조가 올바르지 않습니다.',
-      });
+    if (type === 'js') {
+      if (values?.file.type !== 'text/javascript') {
+        form.setError('file', {
+          type: 'custom',
+          message: 'js 확장자를 가진 파일이어야 합니다.',
+        });
+        return;
+      }
+      try {
+        const i18n = await readJS(values.file);
+        const flattenI18n = convertToDotNotation(i18n);
+        setI18n(flattenI18n);
+        setFileName(values?.file.name, type);
+      } catch (error) {
+        form.setError('file', {
+          type: 'custom',
+          message: '파일 구조가 올바르지 않습니다.',
+        });
+      }
+    } else {
+      if (
+        values?.file.type !==
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      ) {
+        form.setError('file', {
+          type: 'custom',
+          message: 'xlsx 확장자를 가진 파일이어야 합니다.',
+        });
+        return;
+      }
+      try {
+        const excel = await readExcel(values.file);
+        const rows = Object.values(excel)[0];
+        setRows(rows);
+        setFileName(values?.file.name, type);
+      } catch (error) {
+        form.setError('file', {
+          type: 'custom',
+          message: '파일 구조가 올바르지 않습니다.',
+        });
+      }
     }
   }
   return (
@@ -80,8 +106,12 @@ export default function TranslateForm({
                     if (e.target.files?.length === 0) {
                       return;
                     }
-                    clearI18n();
-                    clearFileName();
+                    if (type === 'js') {
+                      clearI18n();
+                    } else {
+                      clearRows();
+                    }
+                    clearFileName(type);
                     field.onChange(e.target.files ? e.target.files[0] : null);
                   }}
                 />

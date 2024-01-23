@@ -9,8 +9,20 @@ import { useTranslateStore } from '@/store/translate';
 import { useCallback } from 'react';
 import * as xlsx from 'xlsx';
 
-export default function PreviewToolbar() {
-  const { i18n, fileName, clearI18n } = useTranslateStore();
+export default function PreviewToolbar({
+  type = 'js',
+}: {
+  type?: 'js' | 'excel';
+}) {
+  const {
+    i18n,
+    fileNameJS,
+    fileNameExcel,
+    rows,
+    clearI18n,
+    clearFileName,
+    clearRows,
+  } = useTranslateStore();
 
   const handleDownload = useCallback(() => {
     const i18nArray = [];
@@ -27,17 +39,23 @@ export default function PreviewToolbar() {
 
     ws['!cols'] = wscols;
 
-    xlsx.utils.book_append_sheet(wb, ws, fileName);
-    xlsx.writeFile(wb, `${fileName}.xlsx`);
-  }, [i18n, fileName]);
+    xlsx.utils.book_append_sheet(wb, ws, fileNameJS);
+    xlsx.writeFile(wb, `${fileNameJS}.xlsx`);
+  }, [i18n, fileNameJS]);
   return (
-    <div className="flex flex-row items-center justify-between">
+    <div className="flex flex-row items-center">
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
             variant={'ghost'}
+            className="absolute"
             onClick={() => {
-              clearI18n();
+              if (type === 'js') {
+                clearI18n();
+              } else {
+                clearRows();
+              }
+              clearFileName(type);
             }}
           >
             <ChevronLeft />
@@ -47,8 +65,14 @@ export default function PreviewToolbar() {
           <p>뒤로가기</p>
         </TooltipContent>
       </Tooltip>
-      <h1 className="text-xl font-bold">{fileName}</h1>
-      <Button onClick={handleDownload}>다운로드</Button>
+      <h1 className="mx-auto text-xl font-bold">
+        {type === 'js' ? fileNameJS : fileNameExcel}
+      </h1>
+      {type === 'js' ? (
+        <Button onClick={handleDownload}>다운로드</Button>
+      ) : (
+        <div></div>
+      )}
     </div>
   );
 }
