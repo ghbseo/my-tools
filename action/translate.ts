@@ -53,3 +53,29 @@ export async function readExcel(file: File): Promise<object> {
     reader.onerror = reject;
   });
 }
+
+export function unFlatten(
+  data: Array<{ [key: string]: any }>,
+  sheetKey: string,
+  sheetValue: string
+) {
+  const result: { [key: string]: any } = {};
+  data.forEach((item) => {
+    const keys = item[sheetKey];
+    const value = item[sheetValue];
+
+    let prev = result;
+    const keyArray = keys.split('.');
+    keyArray.forEach((key: string, index: number) => {
+      if (!prev[key]) {
+        prev[key] = {};
+      }
+      if (index === keyArray.length - 1) {
+        prev[key] = value;
+      }
+      prev = prev[key];
+    });
+  });
+
+  return result;
+}

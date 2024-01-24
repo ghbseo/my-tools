@@ -17,9 +17,6 @@ import { Input } from '../ui/input';
 import { convertToDotNotation, readJS, readExcel } from '@/action/translate';
 import { useTranslateStore } from '@/store/translate';
 
-const MAX_FILE_SIZE = 500000;
-const ACCEPTED_FILE_TYPES = ['text/javascript'];
-
 const formSchema = z.object({
   file: z.instanceof(File),
 });
@@ -41,8 +38,14 @@ export default function TranslateForm({
       file: new File([], ''),
     },
   });
-  const { setI18n, setFileName, setRows, clearI18n, clearFileName, clearRows } =
-    useTranslateStore();
+  const {
+    setI18n,
+    setFileName,
+    setExcel,
+    clearI18n,
+    clearFileName,
+    clearExcel,
+  } = useTranslateStore();
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (type === 'js') {
@@ -77,8 +80,7 @@ export default function TranslateForm({
       }
       try {
         const excel = await readExcel(values.file);
-        const rows = Object.values(excel)[0];
-        setRows(rows);
+        setExcel(excel);
         setFileName(values?.file.name, type);
       } catch (error) {
         form.setError('file', {
@@ -109,7 +111,7 @@ export default function TranslateForm({
                     if (type === 'js') {
                       clearI18n();
                     } else {
-                      clearRows();
+                      clearExcel();
                     }
                     clearFileName(type);
                     field.onChange(e.target.files ? e.target.files[0] : null);

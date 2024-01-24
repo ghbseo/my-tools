@@ -18,10 +18,9 @@ export default function PreviewToolbar({
     i18n,
     fileNameJS,
     fileNameExcel,
-    rows,
     clearI18n,
     clearFileName,
-    clearRows,
+    clearExcel,
   } = useTranslateStore();
 
   const handleDownload = useCallback(() => {
@@ -43,7 +42,7 @@ export default function PreviewToolbar({
     xlsx.writeFile(wb, `${fileNameJS}.xlsx`);
   }, [i18n, fileNameJS]);
   return (
-    <div className="flex flex-row items-center">
+    <div className="flex h-7 flex-row items-center">
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
@@ -53,7 +52,7 @@ export default function PreviewToolbar({
               if (type === 'js') {
                 clearI18n();
               } else {
-                clearRows();
+                clearExcel();
               }
               clearFileName(type);
             }}

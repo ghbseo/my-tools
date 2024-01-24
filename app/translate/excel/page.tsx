@@ -1,15 +1,16 @@
 'use client';
 
+import PreviewJS from '@/components/translate/preview-js';
+import PreviewToolbar from '@/components/translate/preview-toolbar';
 import TranslateForm from '@/components/translate/translate-form';
 import { useTranslateStore } from '@/store/translate';
-import PreviewToolbar from '@/components/translate/preview-toolbar';
-import PreviewJS from '@/components/translate/preview-js';
 
 export default function Page() {
-  const { rows } = useTranslateStore();
+  const { excel } = useTranslateStore();
+
   return (
     <main className="flex h-full p-4">
-      {rows.length === 0 && (
+      {Object.keys(excel).length === 0 && (
         <div className="flex w-full items-center justify-center">
           <TranslateForm
             title=".xlsx 파일 변환하기"
@@ -18,10 +19,10 @@ export default function Page() {
           />
         </div>
       )}
-      {rows.length > 0 && (
-        <div className="flex w-full flex-col gap-2">
+      {Object.keys(excel).length > 0 && (
+        <div className="flex h-full w-full flex-col gap-2">
           <PreviewToolbar type="excel" />
-          <PreviewJS />
+          <PreviewJS excel={excel} />
         </div>
       )}
     </main>
