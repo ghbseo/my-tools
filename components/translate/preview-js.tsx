@@ -11,6 +11,7 @@ import {
   SelectContent,
   SelectItem,
 } from '../ui/select';
+import { toast } from 'sonner';
 
 export default function PreviewJS({
   excel,
@@ -107,7 +108,10 @@ export default function PreviewJS({
             try {
               await navigator.clipboard.writeText(copyText);
               setCopied(true);
-            } catch (error) {}
+              toast.success('복사가 완료되었습니다');
+            } catch (error) {
+              toast.error('복사 실패');
+            }
           }}
         >
           <Copy className={cn('w-4 scale-100', copied && 'scale-0')} />

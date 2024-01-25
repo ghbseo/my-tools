@@ -1,10 +1,15 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Inconsolata } from 'next/font/google';
 import './globals.css';
 import Header from '@/components/header/header';
 import Providers from './providers';
+import { Toaster } from '@/components/ui/sonner';
 
-const inter = Inter({ subsets: ['latin'] });
+const font = Inconsolata({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inconsolata',
+});
 
 export const metadata: Metadata = {
   title: '도구',
@@ -18,10 +23,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="kr">
-      <body className={inter.className}>
+      <body className={font.className}>
         <Providers>
           <Header />
           <div className="absolute top-0 h-full w-full pt-10">{children}</div>
+          <Toaster richColors closeButton />
         </Providers>
       </body>
     </html>
